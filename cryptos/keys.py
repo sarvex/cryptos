@@ -94,9 +94,7 @@ class PublicKey(Point):
         checksum = sha256(sha256(ver_pkb_hash))[:4]
         # append to form the full 25-byte binary Bitcoin Address
         byte_address = ver_pkb_hash + checksum
-        # finally b58 encode the result
-        b58check_address = b58encode(byte_address)
-        return b58check_address
+        return b58encode(byte_address)
 
 # -----------------------------------------------------------------------------
 # convenience functions
@@ -123,8 +121,7 @@ def b58encode(b: bytes) -> str:
         chars.append(alphabet[i])
     # special case handle the leading 0 bytes... ¯\_(ツ)_/¯
     num_leading_zeros = len(b) - len(b.lstrip(b'\x00'))
-    res = num_leading_zeros * alphabet[0] + ''.join(reversed(chars))
-    return res
+    return num_leading_zeros * alphabet[0] + ''.join(reversed(chars))
 
 def b58decode(res: str) -> bytes:
     n = sum(alphabet_inv[c] * 58**i for i, c in enumerate(reversed(res)))
@@ -135,6 +132,4 @@ def address_to_pkb_hash(b58check_address: str) -> bytes:
     byte_address = b58decode(b58check_address)
     # validate the checksum
     assert byte_address[-4:] == sha256(sha256(byte_address[:-4]))[:4]
-    # strip the version in front and the checksum at tail
-    pkb_hash = byte_address[1:-4]
-    return pkb_hash
+    return byte_address[1:-4]

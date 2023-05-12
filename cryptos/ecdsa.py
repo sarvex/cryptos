@@ -86,8 +86,7 @@ def sign(secret_key: int, message: bytes) -> Signature:
     if s > n / 2:
         s = n - s
 
-    sig = Signature(r, s)
-    return sig
+    return Signature(r, s)
 
 def verify(public_key: Point, message: bytes, sig: Signature) -> bool:
 
@@ -105,7 +104,5 @@ def verify(public_key: Point, message: bytes, sig: Signature) -> bool:
     u1 = z * w % n
     u2 = sig.r * w % n
     P = (u1 * BITCOIN.gen.G) + (u2 * public_key)
-    match = P.x == sig.r
-
-    return match
+    return P.x == sig.r
 

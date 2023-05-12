@@ -52,8 +52,7 @@ def ripemd160(b: bytes) -> bytes:
     """ simple wrapper for a simpler API to this hash function, just bytes to bytes """
     ctx = RMDContext()
     RMD160Update(ctx, b, len(b))
-    digest = RMD160Final(ctx)
-    return digest
+    return RMD160Final(ctx)
 
 # -----------------------------------------------------------------------------
 

@@ -73,13 +73,15 @@ class TxFetcher:
             # print("fetching transaction %s from API" % (tx_id, ))
             assert net is not None, "can't fetch a transaction without knowing which net to look at, e.g. main|test"
             if net == 'main':
-                url = 'https://blockstream.info/api/tx/%s/hex' % (tx_id, )
+                url = f'https://blockstream.info/api/tx/{tx_id}/hex'
             elif net == 'test':
-                url = 'https://blockstream.info/testnet/api/tx/%s/hex' % (tx_id, )
+                url = f'https://blockstream.info/testnet/api/tx/{tx_id}/hex'
             else:
-                raise ValueError("%s is not a valid net type, should be main|test" % (net, ))
+                raise ValueError(f"{net} is not a valid net type, should be main|test")
             response = requests.get(url)
-            assert response.status_code == 200, "transaction id %s was not found on blockstream" % (tx_id, )
+            assert (
+                response.status_code == 200
+            ), f"transaction id {tx_id} was not found on blockstream"
             raw = bytes.fromhex(response.text.strip())
             # cache on disk
             if not os.path.isdir(txdb_dir):
@@ -112,14 +114,10 @@ class Tx:
             assert s.read(1) == b'\x01' # assert segwit flag
             num_inputs = decode_varint(s) # override num_inputs
             segwit = True
-        inputs = []
-        for _ in range(num_inputs):
-            inputs.append(TxIn.decode(s))
+        inputs = [TxIn.decode(s) for _ in range(num_inputs)]
         # decode outputs
         num_outputs = decode_varint(s)
-        outputs = []
-        for _ in range(num_outputs):
-            outputs.append(TxOut.decode(s))
+        outputs = [TxOut.decode(s) for _ in range(num_outputs)]
         # decode witness in the case of segwit
         if segwit:
             for tx_in in inputs:
@@ -261,8 +259,7 @@ class TxIn:
     def script_pubkey(self):
         # look the script_pubkey up on the previous transaction
         tx = TxFetcher.fetch(self.prev_tx.hex(), net=self.net)
-        script = tx.tx_outs[self.prev_index].script_pubkey
-        return script
+        return tx.tx_outs[self.prev_index].script_pubkey
 
 
 @dataclass
@@ -288,7 +285,7 @@ class Script:
     cmds: List[Union[int, bytes]]
 
     def __repr__(self):
-        repr_int = lambda cmd: OP_CODE_NAMES.get(cmd, 'OP_[{}]'.format(cmd))
+        repr_int = lambda cmd: OP_CODE_NAMES.get(cmd, f'OP_[{cmd}]')
         repr_bytes = lambda cmd: cmd.hex()
         repr_cmd = lambda cmd: repr_int(cmd) if isinstance(cmd, int) else repr_bytes(cmd)
         return ' '.join(map(repr_cmd, self.cmds))
@@ -368,9 +365,7 @@ class Script:
         sec = self.cmds[1] # SEC encoded public key
         sig = Signature.decode(der)
         pk = PublicKey.decode(sec)
-        valid = verify(pk, mod_tx_enc, sig)
-
-        return valid
+        return verify(pk, mod_tx_enc, sig)
 
     def __add__(self, other):
         return Script(self.cmds + other.cmds)

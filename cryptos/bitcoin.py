@@ -27,8 +27,7 @@ def bitcoin_gen():
     n = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141
     curve = Curve(p, a, b)
     G = Point(curve, Gx, Gy)
-    gen = Generator(G, n)
-    return gen
+    return Generator(G, n)
 
 # create an object that can be imported from other modules
 BITCOIN = Coin(bitcoin_gen())

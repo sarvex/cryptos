@@ -28,8 +28,7 @@ class NetworkEnvelope:
     net: str
 
     def __repr__(self):
-        return "[NetworkEnvelope] Command: %s, Payload: %s" % \
-               (self.command.decode('ascii'), self.payload.hex())
+        return f"[NetworkEnvelope] Command: {self.command.decode('ascii')}, Payload: {self.payload.hex()}"
 
     @classmethod
     def decode(cls, s, net):

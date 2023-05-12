@@ -29,8 +29,7 @@ def encode_int(i, nbytes, encoding='little'):
 def bits_to_target(bits):
     exponent = bits[-1]
     coeff = int.from_bytes(bits[:-1], 'little')
-    target = coeff * 256**(exponent - 3)
-    return target
+    return coeff * 256**(exponent - 3)
 
 def target_to_bits(target):
     b = target.to_bytes(32, 'big')
@@ -43,9 +42,7 @@ def target_to_bits(target):
     else:
         exponent = len(b)
         coeff = b[:3]
-    # encode coeff in little endian and exponent is at the end
-    new_bits = coeff[::-1] + bytes([exponent])
-    return new_bits
+    return coeff[::-1] + bytes([exponent])
 
 def calculate_new_bits(prev_bits, dt):
     two_weeks = 60*60*24*14 # number of seconds in two week period
@@ -53,8 +50,7 @@ def calculate_new_bits(prev_bits, dt):
     prev_target = bits_to_target(prev_bits)
     new_target = int(prev_target * dt / two_weeks)
     new_target = min(new_target, 0xffff * 256**(0x1d - 3)) # cap maximum target
-    new_bits = target_to_bits(new_target)
-    return new_bits
+    return target_to_bits(new_target)
 
 # -----------------------------------------------------------------------------
 
@@ -95,14 +91,10 @@ class Block:
 
     def difficulty(self) -> float:
         genesis_block_target = 0xffff * 256**(0x1d - 3)
-        diff = genesis_block_target / self.target()
-        return diff
+        return genesis_block_target / self.target()
 
     def validate(self) -> bool:
         """ validate this block """
         # 1) validate bits (target) field (todo)
         # 2) validate proof of work
-        if int(self.id(), 16) >= self.target():
-            return False
-        # if everything passes the block is good
-        return True
+        return int(self.id(), 16) < self.target()
